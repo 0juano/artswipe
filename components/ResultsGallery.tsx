@@ -12,15 +12,18 @@ interface ResultsGalleryProps {
 
 export default function ResultsGallery({ explanation, artworks, onStartOver }: ResultsGalleryProps) {
   const [selectedArtwork, setSelectedArtwork] = useState<GeneratedArtwork | null>(null)
+  const [viewMode, setViewMode] = useState<Record<string, 'framed' | 'clean'>>({})
 
-  const handleDownload = async (artwork: GeneratedArtwork) => {
+  const handleDownload = async (artwork: GeneratedArtwork, index?: number) => {
     try {
-      const response = await fetch(artwork.imageUrl)
+      const key = artwork.id || index?.toString() || '0'
+      const imageUrl = viewMode[key] === 'clean' && artwork.cleanImageUrl ? artwork.cleanImageUrl : artwork.imageUrl
+      const response = await fetch(imageUrl)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `artswipe-${Date.now()}.png`
+      a.download = `artswipe-${viewMode[key] === 'clean' ? 'clean' : 'framed'}-${Date.now()}.png`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -42,8 +45,8 @@ export default function ResultsGallery({ explanation, artworks, onStartOver }: R
         {/* Generated Artworks */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6 text-gray-900">Your Personalized Collection</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {artworks.map((artwork, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {artworks.slice(0, 4).map((artwork, index) => (
               <div
                 key={artwork.id || index}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow"
@@ -53,7 +56,7 @@ export default function ResultsGallery({ explanation, artworks, onStartOver }: R
                   className="w-full aspect-square relative group"
                 >
                   <Image
-                    src={artwork.imageUrl}
+                    src={viewMode[artwork.id || index.toString()] === 'clean' && artwork.cleanImageUrl ? artwork.cleanImageUrl : artwork.imageUrl}
                     alt={`Generated artwork ${index + 1}`}
                     fill
                     className="object-cover"
@@ -63,12 +66,28 @@ export default function ResultsGallery({ explanation, artworks, onStartOver }: R
                 </button>
                 
                 <div className="p-4">
-                  <button
-                    onClick={() => handleDownload(artwork)}
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors mb-2"
-                  >
-                    Download
-                  </button>
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      onClick={() => handleDownload(artwork, index)}
+                      className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Download
+                    </button>
+                    {artwork.cleanImageUrl && (
+                      <button
+                        onClick={() => {
+                          const key = artwork.id || index.toString()
+                          setViewMode(prev => ({
+                            ...prev,
+                            [key]: prev[key] === 'clean' ? 'framed' : 'clean'
+                          }))
+                        }}
+                        className="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        {viewMode[artwork.id || index.toString()] === 'clean' ? 'View Framed' : 'View Clean'}
+                      </button>
+                    )}
+                  </div>
                   
                   <details className="text-sm">
                     <summary className="cursor-pointer text-gray-600 hover:text-gray-900">
@@ -108,7 +127,7 @@ export default function ResultsGallery({ explanation, artworks, onStartOver }: R
         >
           <div className="relative max-w-4xl max-h-[90vh]">
             <Image
-              src={selectedArtwork.imageUrl}
+              src={viewMode[selectedArtwork.id || '0'] === 'clean' && selectedArtwork.cleanImageUrl ? selectedArtwork.cleanImageUrl : selectedArtwork.imageUrl}
               alt="Selected artwork"
               width={1024}
               height={1024}

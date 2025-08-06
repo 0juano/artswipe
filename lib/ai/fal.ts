@@ -18,16 +18,22 @@ interface FalResponse {
 
 export async function generatePersonalizedArtworks(
   preferences: UserPreferences,
-  count: number = 12
+  count: number = 4
 ): Promise<GeneratedArtwork[]> {
   const prompts = generatePromptVariations(preferences, count)
   const results: GeneratedArtwork[] = []
 
-  // Generate images in parallel batches of 3 to avoid rate limiting
-  const batchSize = 3
+  // Generate both framed and clean versions for each artwork
+  const batchSize = 2
   for (let i = 0; i < prompts.length; i += batchSize) {
     const batch = prompts.slice(i, i + batchSize)
-    const batchPromises = batch.map(prompt => generateSingleArtwork(prompt, i))
+    const batchPromises: Promise<GeneratedArtwork>[] = []
+    
+    for (const promptVariation of batch) {
+      // Generate with frame and clean version
+      batchPromises.push(generateArtworkPair(promptVariation.framed, promptVariation.clean, i, preferences.orientation || 'square'))
+    }
+    
     const batchResults = await Promise.all(batchPromises)
     results.push(...batchResults)
   }
@@ -35,41 +41,62 @@ export async function generatePersonalizedArtworks(
   return results
 }
 
-async function generateSingleArtwork(prompt: string, orderIndex: number): Promise<GeneratedArtwork> {
+async function generateArtworkPair(framedPrompt: string, cleanPrompt: string, orderIndex: number, orientation: string = 'square'): Promise<GeneratedArtwork> {
   try {
-    const response = await fetch('https://fal.run/fal-ai/flux/dev', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${getFalApiKey()}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        image_size: 'square',
-        num_inference_steps: 28,
-        guidance_scale: 3.5,
-        num_images: 1,
-        enable_safety_checker: true,
+    // Generate both versions in parallel
+    const [framedResponse, cleanResponse] = await Promise.all([
+      fetch('https://fal.run/fal-ai/flux/dev', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${getFalApiKey()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: framedPrompt,
+          image_size: getImageSize(orientation),
+          num_inference_steps: 28,
+          guidance_scale: 3.5,
+          num_images: 1,
+          enable_safety_checker: true,
+        }),
       }),
-    })
+      fetch('https://fal.run/fal-ai/flux/dev', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Key ${getFalApiKey()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: cleanPrompt,
+          image_size: getImageSize(orientation),
+          num_inference_steps: 28,
+          guidance_scale: 3.5,
+          num_images: 1,
+          enable_safety_checker: true,
+        }),
+      })
+    ])
 
-    if (!response.ok) {
-      throw new Error(`FAL API error: ${response.statusText}`)
+    if (!framedResponse.ok || !cleanResponse.ok) {
+      throw new Error(`FAL API error`)
     }
 
-    const data: FalResponse = await response.json()
+    const framedData: FalResponse = await framedResponse.json()
+    const cleanData: FalResponse = await cleanResponse.json()
     
     return {
-      imageUrl: data.images[0].url,
-      prompt,
+      imageUrl: framedData.images[0].url,
+      cleanImageUrl: cleanData.images[0].url,
+      prompt: framedPrompt,
       orderIndex,
     }
   } catch (error) {
-    console.error('Error generating artwork:', error)
+    console.error('Error generating artwork pair:', error)
     // Return placeholder in case of error
     return {
       imageUrl: 'https://via.placeholder.com/1024x1024?text=Generation+Failed',
-      prompt,
+      cleanImageUrl: 'https://via.placeholder.com/1024x1024?text=Generation+Failed',
+      prompt: framedPrompt,
       orderIndex,
     }
   }
@@ -107,11 +134,15 @@ export async function generateTestImage(spec: any, seed?: number): Promise<strin
   }
 }
 
-function generatePromptVariations(preferences: UserPreferences, count: number): string[] {
-  const { style, subjects, complexity, palette, room } = preferences
+interface PromptPair {
+  framed: string
+  clean: string
+}
+
+function generatePromptVariations(preferences: UserPreferences, count: number): PromptPair[] {
+  const { style, subjects, complexity, palette, orientation } = preferences
   const complexityDesc = getComplexityDescriptor(complexity)
   const paletteDesc = palette.replace('-', ' ')
-  const roomDesc = room?.replace('-', ' ') || 'living room'
 
   const baseVariations = [
     // Core preference
@@ -123,41 +154,19 @@ function generatePromptVariations(preferences: UserPreferences, count: number): 
     // Vary complexity slightly
     `${style} style ${subjects[0]}, slightly more minimal`,
     `${style} style ${subjects[0]}, slightly more detailed`,
-    
-    // Try different moods
-    `${style} style ${subjects[0]}, soft morning light`,
-    `${style} style ${subjects[0]}, dramatic evening shadows`,
-    
-    // Mix in secondary subject
-    `${style} style ${subjects[1]}`,
-    
-    // Abstract interpretation
-    `abstract interpretation of ${subjects[0]} in ${style} style`,
-    
-    // Seasonal variations
-    `${style} style ${subjects[0]}, autumn atmosphere`,
-    `${style} style ${subjects[0]}, spring freshness`,
-    
-    // Texture variations
-    `${style} style ${subjects[0]}, smooth textures`,
-    `${style} style ${subjects[0]}, rich textures`,
-    
-    // Third subject if available
-    subjects[2] ? `${style} style ${subjects[2]}` : `${style} style abstract composition`,
-    
-    // Geometric variation
-    `${style} style geometric interpretation of ${subjects[0]}`,
-    
-    // Organic variation
-    `${style} style organic flowing ${subjects[0]}`,
   ]
 
   // Take only the requested number of variations
   const selectedVariations = baseVariations.slice(0, count)
 
-  // Add complexity, palette, and room context to each
+  // Create both framed and clean versions for each variation
   return selectedVariations.map(base => {
-    return `${base}, ${complexityDesc}, ${paletteDesc} color palette, high quality wall art for ${roomDesc}, professional photography, museum quality`
+    const basePrompt = `${base}, ${complexityDesc}, ${paletteDesc} color palette`
+    
+    return {
+      framed: `close-up of framed artwork on gallery wall, ${basePrompt}, elegant wooden or metal frame, professional gallery lighting, museum-quality presentation, high-end wall art, sharp focus on the artwork, professional interior photography, luxurious home decor`,
+      clean: `${basePrompt}, high quality digital art, professional artwork, museum quality, clean composition, no frame, full artwork view, high resolution, masterpiece quality, perfect for wall art`
+    }
   })
 }
 
@@ -167,6 +176,18 @@ function getComplexityDescriptor(complexity: number): string {
   if (complexity < 0.7) return 'balanced detail level'
   if (complexity < 0.9) return 'richly detailed composition'
   return 'highly complex and intricate'
+}
+
+function getImageSize(orientation: string): 'portrait' | 'landscape' | 'square' {
+  switch (orientation) {
+    case 'vertical':
+      return 'portrait'
+    case 'landscape':
+      return 'landscape'
+    case 'square':
+    default:
+      return 'square'
+  }
 }
 
 function buildTestImagePrompt(spec: any): string {

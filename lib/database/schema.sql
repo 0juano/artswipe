@@ -41,6 +41,7 @@ CREATE TABLE generated_artworks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID REFERENCES sessions(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
+    clean_image_url TEXT,
     prompt TEXT NOT NULL,
     order_index INTEGER,
     created_at TIMESTAMP DEFAULT NOW()

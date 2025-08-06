@@ -3,15 +3,13 @@
 import { useState } from 'react'
 
 interface IntakeFormProps {
-  onComplete: (data: { room: string; palette: string; size: string }) => void
+  onComplete: (data: { orientation: string; palette: string; size: string }) => void
 }
 
-const ROOMS = [
-  { value: 'living-room', label: 'Living Room', icon: '🛋️' },
-  { value: 'bedroom', label: 'Bedroom', icon: '🛏️' },
-  { value: 'office', label: 'Office', icon: '💼' },
-  { value: 'dining-room', label: 'Dining Room', icon: '🍽️' },
-  { value: 'hallway', label: 'Hallway', icon: '🚪' },
+const ORIENTATIONS = [
+  { value: 'vertical', label: 'Vertical', icon: '📐', description: 'Portrait (3:4)' },
+  { value: 'landscape', label: 'Landscape', icon: '🖼️', description: 'Wide (4:3)' },
+  { value: 'square', label: 'Square', icon: '⬜', description: '1:1 ratio' },
 ]
 
 const PALETTES = [
@@ -32,20 +30,20 @@ const SIZES = [
 
 export default function IntakeForm({ onComplete }: IntakeFormProps) {
   const [step, setStep] = useState(1)
-  const [room, setRoom] = useState('')
+  const [orientation, setOrientation] = useState('')
   const [palette, setPalette] = useState('')
   const [size, setSize] = useState('')
 
   const handleNext = () => {
-    if (step === 1 && room) setStep(2)
+    if (step === 1 && orientation) setStep(2)
     else if (step === 2 && palette) setStep(3)
     else if (step === 3 && size) {
-      onComplete({ room, palette, size })
+      onComplete({ orientation, palette, size })
     }
   }
 
   const isNextDisabled = 
-    (step === 1 && !room) ||
+    (step === 1 && !orientation) ||
     (step === 2 && !palette) ||
     (step === 3 && !size)
 
@@ -63,7 +61,7 @@ export default function IntakeForm({ onComplete }: IntakeFormProps) {
           ))}
         </div>
         <h2 className="text-2xl font-bold text-gray-900">
-          {step === 1 && "Where will your art live?"}
+          {step === 1 && "What orientation do you prefer?"}
           {step === 2 && "What colors do you prefer?"}
           {step === 3 && "What size works best?"}
         </h2>
@@ -71,19 +69,20 @@ export default function IntakeForm({ onComplete }: IntakeFormProps) {
 
       <div className="space-y-4">
         {step === 1 && (
-          <div className="grid grid-cols-2 gap-4">
-            {ROOMS.map((r) => (
+          <div className="grid grid-cols-3 gap-4">
+            {ORIENTATIONS.map((o) => (
               <button
-                key={r.value}
-                onClick={() => setRoom(r.value)}
+                key={o.value}
+                onClick={() => setOrientation(o.value)}
                 className={`p-6 rounded-xl border-2 transition-all text-center ${
-                  room === r.value
+                  orientation === o.value
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300 bg-white'
                 }`}
               >
-                <div className="text-3xl mb-2">{r.icon}</div>
-                <div className="font-medium text-gray-900">{r.label}</div>
+                <div className="text-3xl mb-2">{o.icon}</div>
+                <div className="font-medium text-gray-900">{o.label}</div>
+                <div className="text-sm text-gray-500 mt-1">{o.description}</div>
               </button>
             ))}
           </div>

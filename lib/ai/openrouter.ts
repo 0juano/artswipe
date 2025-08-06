@@ -14,7 +14,7 @@ export async function generateTasteExplanation(
 - Preferred subjects: ${preferences.subjects.join(', ')}
 - Complexity level: ${preferences.complexity.toFixed(2)} (0=minimal, 1=complex)
 - Color palette: ${preferences.palette.replace('-', ' ')}
-- Room: ${preferences.room?.replace('-', ' ')}
+- Orientation: ${preferences.orientation || 'square'}
 
 The user consistently chose ${preferences.style} style images over others, showed preference for ${preferences.subjects[0]} subjects, and selected ${complexityDescription} compositions.
 
@@ -61,7 +61,7 @@ Format: Start with "Your Art DNA:" then the explanation. Be warm and conversatio
   } catch (error) {
     console.error('Error generating taste explanation:', error)
     // Fallback explanation
-    return `Your Art DNA: You're drawn to ${preferences.style} art featuring ${preferences.subjects[0]} with ${complexityDescription} compositions. Your preference for ${preferences.palette.replace('-', ' ')} colors creates a cohesive aesthetic that's perfect for your ${preferences.room?.replace('-', ' ')}. The art that speaks to you balances simplicity with just enough visual interest to keep things engaging.`
+    return `Your Art DNA: You're drawn to ${preferences.style} art featuring ${preferences.subjects[0]} with ${complexityDescription} compositions. Your preference for ${preferences.palette.replace('-', ' ')} colors creates a cohesive aesthetic. The art that speaks to you balances simplicity with just enough visual interest to keep things engaging.`
   }
 }
 

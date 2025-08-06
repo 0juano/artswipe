@@ -5,18 +5,21 @@ import IntakeForm from '@/components/IntakeForm'
 import ImageComparison from '@/components/ImageComparison'
 import ResultsGallery from '@/components/ResultsGallery'
 import ProgressBar from '@/components/ProgressBar'
+import LoadingScreen from '@/components/LoadingScreen'
 import { SessionData, TestImagePair, GeneratedArtwork, UserPreferences } from '@/types'
 
 export default function ArtSwipeFlow() {
-  const [stage, setStage] = useState<'intake' | 'discovery' | 'results'>('intake')
+  const [stage, setStage] = useState<'intake' | 'discovery' | 'generating' | 'results'>('intake')
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [currentPair, setCurrentPair] = useState<TestImagePair | null>(null)
   const [interactionCount, setInteractionCount] = useState(0)
   const [explanation, setExplanation] = useState('')
   const [generatedArt, setGeneratedArt] = useState<GeneratedArtwork[]>([])
   const [preferences, setPreferences] = useState<UserPreferences | null>(null)
+  const [algorithmVersion, setAlgorithmVersion] = useState<string>('basic')
+  const [choiceStartTime, setChoiceStartTime] = useState<number>(Date.now())
 
-  const handleIntakeComplete = async (data: { room: string; palette: string; size: string }) => {
+  const handleIntakeComplete = async (data: { orientation: string; palette: string; size: string }) => {
     try {
       const response = await fetch('/api/session/start', {
         method: 'POST',
@@ -31,6 +34,8 @@ export default function ArtSwipeFlow() {
       const result = await response.json()
       setSessionData(result.session)
       setCurrentPair(result.firstPair)
+      setAlgorithmVersion(result.algorithmVersion)
+      setChoiceStartTime(Date.now())
       setStage('discovery')
     } catch (error) {
       console.error('Error starting session:', error)
@@ -42,8 +47,15 @@ export default function ArtSwipeFlow() {
     if (!sessionData || !currentPair) return
 
     try {
-      const startTime = Date.now()
-      const response = await fetch('/api/choice', {
+      // Calculate response time for this choice
+      const responseTime = Date.now() - choiceStartTime
+      
+      // Use appropriate endpoint based on algorithm version
+      const endpoint = algorithmVersion === 'advanced' || algorithmVersion === 'experimental' 
+        ? '/api/choice-v2' 
+        : '/api/choice'
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -52,7 +64,7 @@ export default function ArtSwipeFlow() {
           rightId: currentPair.right.id,
           choice,
           choiceNumber: interactionCount + 1,
-          responseTime: Date.now() - startTime,
+          responseTime,
         }),
       })
 
@@ -60,10 +72,12 @@ export default function ArtSwipeFlow() {
       
       if (result.complete) {
         setPreferences(result.preferences)
+        setStage('generating')
         await generateResults(result.preferences)
       } else {
         setCurrentPair(result.nextPair)
         setInteractionCount(interactionCount + 1)
+        setChoiceStartTime(Date.now())  // Reset timer for next choice
       }
     } catch (error) {
       console.error('Error submitting choice:', error)
@@ -114,6 +128,13 @@ export default function ArtSwipeFlow() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-6xl">
+          {algorithmVersion !== 'basic' && (
+            <div className="mb-2 text-center">
+              <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                Using {algorithmVersion} algorithm
+              </span>
+            </div>
+          )}
           <ProgressBar current={interactionCount} total={20} />
           <ImageComparison
             leftImage={currentPair.left}
@@ -123,6 +144,10 @@ export default function ArtSwipeFlow() {
         </div>
       </div>
     )
+  }
+
+  if (stage === 'generating') {
+    return <LoadingScreen />
   }
 
   if (stage === 'results') {

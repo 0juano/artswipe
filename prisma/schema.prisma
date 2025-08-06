@@ -28,14 +28,17 @@ model TestImage {
 model Session {
   id           String   @id @default(cuid())
   email        String?
-  statedRoom   String
+  statedOrientation String @default("square")
   statedPalette String
   statedSize   String
+  algorithmVersion String @default("basic") // Track which algorithm version
   createdAt    DateTime @default(now())
+  completedAt  DateTime? // Track when session completed
   
   choices      Choice[]
   artworks     GeneratedArtwork[]
   profile      UserProfile?
+  metrics      AlgorithmMetrics?
 }
 
 model Choice {
@@ -54,14 +57,15 @@ model Choice {
 }
 
 model GeneratedArtwork {
-  id         String   @id @default(cuid())
-  sessionId  String
-  imageUrl   String
-  prompt     String
-  orderIndex Int
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  sessionId     String
+  imageUrl      String
+  cleanImageUrl String?
+  prompt        String
+  orderIndex    Int
+  createdAt     DateTime @default(now())
   
-  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session       Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model UserProfile {
@@ -72,7 +76,28 @@ model UserProfile {
   preferredPalette    String
   explanationText     String?
   confidenceScore     Float?
+  secondaryStyles     String?  // JSON array of secondary style preferences
+  styleCorrelations   String?  // JSON array of style-subject correlations
   createdAt           DateTime @default(now())
   
   session             Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model AlgorithmMetrics {
+  id                    Int      @id @default(autoincrement())
+  sessionId             String   @unique
+  algorithmVersion      String
+  totalChoices          Int
+  avgResponseTimeMs     Float
+  confidenceScore       Float
+  consistencyScore      Float?
+  completionTimeMs      Int?
+  userSatisfaction      Int?     // 1-5 rating if collected
+  artworkEngagement     Float?   // Percentage of artworks liked/saved
+  uncertainPairs        Int      @default(0)
+  quickDecisions        Int      @default(0) // < 2 seconds
+  slowDecisions         Int      @default(0) // > 5 seconds
+  createdAt             DateTime @default(now())
+  
+  session               Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }

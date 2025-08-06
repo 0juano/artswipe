@@ -22,13 +22,14 @@ export async function POST(request: NextRequest) {
       data: { explanationText: explanation }
     })
 
-    // Generate personalized artworks
-    const artworks = await generatePersonalizedArtworks(preferences, 12)
+    // Generate personalized artworks (only 4 for curated collection)
+    const artworks = await generatePersonalizedArtworks(preferences, 4)
 
     // Save generated artworks to database
     const artworkData = artworks.map((artwork, index) => ({
       sessionId: sessionId,
       imageUrl: artwork.imageUrl,
+      cleanImageUrl: artwork.cleanImageUrl,
       prompt: artwork.prompt,
       orderIndex: index,
     }))

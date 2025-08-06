@@ -2,7 +2,7 @@ import { TestImage, UserPreferences } from '@/types'
 import { prisma } from '@/lib/database/prisma'
 
 export class TasteDiscovery {
-  private statedRoom: string
+  private statedOrientation: string
   private statedPalette: string
   private statedSize: string
   private styleVotes: Map<string, number>
@@ -12,11 +12,11 @@ export class TasteDiscovery {
   private shownPairs: Set<string>
 
   constructor(statedPreferences: {
-    room: string
+    orientation: string
     palette: string
     size: string
   }) {
-    this.statedRoom = statedPreferences.room
+    this.statedOrientation = statedPreferences.orientation
     this.statedPalette = statedPreferences.palette
     this.statedSize = statedPreferences.size
     
@@ -166,7 +166,7 @@ export class TasteDiscovery {
       subjects: sortedSubjects,
       complexity: avgComplexity,
       palette: this.statedPalette,
-      room: this.statedRoom,
+      orientation: this.statedOrientation,
     }
   }
 

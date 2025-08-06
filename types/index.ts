@@ -18,7 +18,7 @@ export interface TestImagePair {
 export interface SessionData {
   id: string
   email?: string
-  statedRoom: string
+  statedOrientation: string
   statedPalette: string
   statedSize: string
   createdAt: Date
@@ -39,6 +39,7 @@ export interface GeneratedArtwork {
   id?: string
   sessionId?: string
   imageUrl: string
+  cleanImageUrl?: string
   prompt: string
   orderIndex?: number
 }
@@ -48,7 +49,7 @@ export interface UserPreferences {
   subjects: string[]
   complexity: number
   palette: string
-  room?: string
+  orientation?: string
 }
 
 export interface UserProfile {
