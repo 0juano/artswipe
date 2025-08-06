@@ -366,6 +366,28 @@ export class AdvancedTasteDiscovery {
       this.confidenceScore
     )
     
+    // Convert maps to objects for distribution data
+    const styleDistribution: Record<string, number> = {}
+    let totalStyleVotes = 0
+    for (const [style, score] of this.styleScores.entries()) {
+      if (score > 0) {
+        styleDistribution[style] = score
+        totalStyleVotes += score
+      }
+    }
+    // Normalize to percentages
+    for (const style in styleDistribution) {
+      styleDistribution[style] = styleDistribution[style] / totalStyleVotes
+    }
+    
+    // Convert subject scores to object
+    const subjectScoresObj: Record<string, number> = {}
+    for (const [subject, score] of this.subjectScores.entries()) {
+      if (score > 0) {
+        subjectScoresObj[subject] = score
+      }
+    }
+    
     return {
       style: topStyle,
       subjects: sortedSubjects,
@@ -375,6 +397,8 @@ export class AdvancedTasteDiscovery {
       confidence: this.confidenceScore,
       explanationText,
       secondaryStyles,
+      styleDistribution,
+      subjectScores: subjectScoresObj,
       correlations: this.styleSubjectCorrelations
         .filter(c => c.style === topStyle)
         .sort((a, b) => b.strength - a.strength)

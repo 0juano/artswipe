@@ -65,7 +65,7 @@ export class ABTestingFramework {
    */
   static getAlgorithm(
     version: AlgorithmVersion,
-    statedPreferences: { room: string; palette: string; size: string }
+    statedPreferences: { orientation: string; palette: string; size: string }
   ) {
     switch (version) {
       case 'basic':
@@ -136,7 +136,7 @@ class ExperimentalTasteDiscovery extends AdvancedTasteDiscovery {
   private emotionalTones: Map<string, number>
   private culturalPreferences: Map<string, number>
   
-  constructor(statedPreferences: { room: string; palette: string; size: string }) {
+  constructor(statedPreferences: { orientation: string; palette: string; size: string }) {
     super(statedPreferences)
     this.emotionalTones = new Map()
     this.culturalPreferences = new Map()

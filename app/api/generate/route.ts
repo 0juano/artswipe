@@ -22,16 +22,18 @@ export async function POST(request: NextRequest) {
       data: { explanationText: explanation }
     })
 
-    // Generate personalized artworks (only 4 for curated collection)
-    const artworks = await generatePersonalizedArtworks(preferences, 4)
+    // Generate diversified collection of 12 artworks
+    const artworks = await generatePersonalizedArtworks(preferences, 12)
 
-    // Save generated artworks to database
+    // Save generated artworks to database with variation types
     const artworkData = artworks.map((artwork, index) => ({
       sessionId: sessionId,
       imageUrl: artwork.imageUrl,
       cleanImageUrl: artwork.cleanImageUrl,
       prompt: artwork.prompt,
       orderIndex: index,
+      variationType: artwork.variationType,
+      description: artwork.description,
     }))
 
     await prisma.generatedArtwork.createMany({

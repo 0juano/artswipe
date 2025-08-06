@@ -187,7 +187,7 @@ export default function MetricsDashboard() {
               metrics.aggregated['advanced']?.avgConfidence > metrics.aggregated['basic']?.avgConfidence
                 ? 'higher' : 'similar'
             } confidence scores compared to basic</li>
-            <li>• Users make quick decisions (<2s) about {
+            <li>• Users make quick decisions (&lt;2s) about {
               formatPercentage(metrics.aggregated['advanced']?.quickDecisionRate || 0)
             } of the time with the advanced algorithm</li>
             <li>• Average session completion time: {

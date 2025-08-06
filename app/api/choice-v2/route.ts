@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
 
     // Use advanced algorithm
     const discovery = new AdvancedTasteDiscovery({
-      room: session.statedOrientation, // Note: schema changed this field name
+      orientation: session.statedOrientation,
       palette: session.statedPalette,
       size: session.statedSize,
-    })
+    }, sessionId)
 
     // Track metrics
     let quickDecisions = 0

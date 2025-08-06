@@ -1,4 +1,5 @@
 import { UserPreferences, GeneratedArtwork } from '@/types'
+import { DiversifiedArtGenerator } from './diversifiedGeneration'
 
 const getFalApiKey = () => {
   const key = process.env.FAL_API_KEY
@@ -17,10 +18,18 @@ interface FalResponse {
 }
 
 export async function generatePersonalizedArtworks(
-  preferences: UserPreferences,
-  count: number = 4
+  preferences: UserPreferences & { 
+    styleDistribution?: Record<string, number>
+    subjectScores?: Record<string, number>
+    secondaryStyles?: string[]
+  },
+  count: number = 12
 ): Promise<GeneratedArtwork[]> {
-  const prompts = generatePromptVariations(preferences, count)
+  // Use diversified generation if we have distribution data
+  const generator = new DiversifiedArtGenerator(preferences)
+  const plan = generator.createGenerationPlan(count)
+  const prompts = generator.generateDiversePrompts(plan)
+  
   const results: GeneratedArtwork[] = []
 
   // Generate both framed and clean versions for each artwork
@@ -29,9 +38,20 @@ export async function generatePersonalizedArtworks(
     const batch = prompts.slice(i, i + batchSize)
     const batchPromises: Promise<GeneratedArtwork>[] = []
     
-    for (const promptVariation of batch) {
+    for (let j = 0; j < batch.length; j++) {
+      const promptData = batch[j]
+      const index = i + j
       // Generate with frame and clean version
-      batchPromises.push(generateArtworkPair(promptVariation.framed, promptVariation.clean, i, preferences.orientation || 'square'))
+      batchPromises.push(
+        generateArtworkPair(
+          promptData.framed, 
+          promptData.clean, 
+          index, 
+          preferences.orientation || 'square',
+          promptData.type,
+          promptData.description
+        )
+      )
     }
     
     const batchResults = await Promise.all(batchPromises)
@@ -41,7 +61,14 @@ export async function generatePersonalizedArtworks(
   return results
 }
 
-async function generateArtworkPair(framedPrompt: string, cleanPrompt: string, orderIndex: number, orientation: string = 'square'): Promise<GeneratedArtwork> {
+async function generateArtworkPair(
+  framedPrompt: string, 
+  cleanPrompt: string, 
+  orderIndex: number, 
+  orientation: string = 'square',
+  variationType?: string,
+  description?: string
+): Promise<GeneratedArtwork> {
   try {
     // Generate both versions in parallel
     const [framedResponse, cleanResponse] = await Promise.all([
@@ -89,6 +116,8 @@ async function generateArtworkPair(framedPrompt: string, cleanPrompt: string, or
       cleanImageUrl: cleanData.images[0].url,
       prompt: framedPrompt,
       orderIndex,
+      variationType,
+      description,
     }
   } catch (error) {
     console.error('Error generating artwork pair:', error)
@@ -98,6 +127,8 @@ async function generateArtworkPair(framedPrompt: string, cleanPrompt: string, or
       cleanImageUrl: 'https://via.placeholder.com/1024x1024?text=Generation+Failed',
       prompt: framedPrompt,
       orderIndex,
+      variationType,
+      description,
     }
   }
 }

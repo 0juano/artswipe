@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Initialize taste discovery with session preferences
     const discovery = new TasteDiscovery({
-      room: session.statedRoom,
+      orientation: session.statedOrientation,
       palette: session.statedPalette,
       size: session.statedSize,
     })

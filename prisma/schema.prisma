@@ -63,6 +63,8 @@ model GeneratedArtwork {
   cleanImageUrl String?
   prompt        String
   orderIndex    Int
+  variationType String?  // Type: primary, secondary, creative, variation
+  description   String?  // Description of the artwork variation
   createdAt     DateTime @default(now())
   
   session       Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -78,6 +80,8 @@ model UserProfile {
   confidenceScore     Float?
   secondaryStyles     String?  // JSON array of secondary style preferences
   styleCorrelations   String?  // JSON array of style-subject correlations
+  styleDistribution   String?  // JSON object with style percentages
+  subjectScores       String?  // JSON object with subject scores
   createdAt           DateTime @default(now())
   
   session             Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
