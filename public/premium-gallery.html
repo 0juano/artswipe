@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtSwipe Premium Test Images - Gallery View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .filters {
+            padding: 2rem;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: #3a3a3a;
+            border-color: #667eea;
+        }
+        
+        .filter-btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        
+        .gallery {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .image-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #2a2a2a;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .image-container {
+            position: relative;
+            padding-bottom: 100%;
+            background: #000;
+        }
+        
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-info {
+            padding: 1.5rem;
+        }
+        
+        .image-id {
+            font-size: 0.8rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .image-category {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            background: #2a2a2a;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+            color: #ffd700;
+        }
+        
+        .image-prompt {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+            margin-bottom: 0.8rem;
+        }
+        
+        .metadata {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .meta-tag {
+            padding: 0.2rem 0.6rem;
+            background: #222;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        .quality-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .regenerate-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .regenerate-btn:hover {
+            background: #3a3a3a;
+            border-color: #667eea;
+        }
+        
+        .regenerate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .regenerate-btn.loading {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 ArtSwipe Premium Test Gallery</h1>
+        <p>Museum-quality test images generated with FLUX-dev</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">60</div>
+                <div class="stat-label">Premium Images</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">$0.90</div>
+                <div class="stat-label">Generation Cost</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">FLUX-dev</div>
+                <div class="stat-label">Quality Model</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">Framed</div>
+                <div class="stat-label">Black Frames</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">All (60)</button>
+            <button class="filter-btn" data-filter="style">Style Tests (24)</button>
+            <button class="filter-btn" data-filter="complexity">Complexity (15)</button>
+            <button class="filter-btn" data-filter="subject">Subjects (15)</button>
+            <button class="filter-btn" data-filter="color">Color Palettes (6)</button>
+        </div>
+    </div>
+    
+    <div class="gallery" id="gallery">
+        <!-- Images will be loaded here -->
+    </div>
+    
+    <script>
+        async function loadGallery() {
+            try {
+                const response = await fetch('/api/test-images');
+                const images = await response.json();
+                
+                const gallery = document.getElementById('gallery');
+                gallery.innerHTML = images.map((img, index) => `
+                    <div class="image-card" data-category="${img.testCategory}" data-id="${img.id}">
+                        <div class="image-container">
+                            <img src="${img.imageUrl}" alt="Test Image ${img.id}" loading="lazy" id="img-${img.id}">
+                            <div class="quality-badge">PREMIUM</div>
+                        </div>
+                        <div class="image-info">
+                            <div class="image-id">ID: ${img.id}</div>
+                            <div class="image-category">${img.testCategory.toUpperCase()}</div>
+                            <div class="image-prompt">${img.promptUsed?.substring(0, 150)}...</div>
+                            <div class="metadata">
+                                ${img.style ? `<span class="meta-tag">Style: ${img.style}</span>` : ''}
+                                ${img.subject ? `<span class="meta-tag">Subject: ${img.subject}</span>` : ''}
+                                ${img.complexity ? `<span class="meta-tag">Complexity: ${img.complexity}</span>` : ''}
+                                ${img.palette ? `<span class="meta-tag">Palette: ${img.palette}</span>` : ''}
+                            </div>
+                            <button class="regenerate-btn" onclick="regenerateImage(${img.id})">
+                                🔄 Regenerate Image
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Filter functionality
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        
+                        const filter = btn.dataset.filter;
+                        document.querySelectorAll('.image-card').forEach(card => {
+                            if (filter === 'all' || card.dataset.category === filter) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                document.getElementById('gallery').innerHTML = '<p style="text-align: center; padding: 2rem;">Error loading images. Please check the console.</p>';
+            }
+        }
+        
+        async function regenerateImage(id) {
+            const button = document.querySelector(`[data-id="${id}"] .regenerate-btn`);
+            const img = document.getElementById(`img-${id}`);
+            
+            if (!button) return;
+            
+            // Update button state
+            button.disabled = true;
+            button.classList.add('loading');
+            button.innerHTML = '⏳ Regenerating...';
+            
+            try {
+                const response = await fetch('/api/regenerate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update the image with the new URL
+                    img.src = data.imageUrl;
+                    
+                    // Success feedback
+                    button.innerHTML = '✅ Regenerated!';
+                    button.style.background = '#28a745';
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.classList.remove('loading');
+                        button.innerHTML = '🔄 Regenerate Image';
+                        button.style.background = '';
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Failed to regenerate');
+                }
+                
+            } catch (error) {
+                console.error('Error regenerating image:', error);
+                
+                // Error feedback
+                button.innerHTML = '❌ Failed';
+                button.style.background = '#dc3545';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.classList.remove('loading');
+                    button.innerHTML = '🔄 Regenerate Image';
+                    button.style.background = '';
+                }, 2000);
+            }
+        }
+        
+        loadGallery();
+    </script>
+</body>
+</html>

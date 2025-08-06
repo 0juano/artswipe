@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model TestImage {
+  id           Int      @id @default(autoincrement())
+  imageUrl     String
+  style        String?
+  subject      String?
+  palette      String?
+  complexity   String?
+  testCategory String
+  promptUsed   String?
+  createdAt    DateTime @default(now())
+  
+  choicesLeft  Choice[] @relation("LeftImage")
+  choicesRight Choice[] @relation("RightImage")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  email        String?
+  statedRoom   String
+  statedPalette String
+  statedSize   String
+  createdAt    DateTime @default(now())
+  
+  choices      Choice[]
+  artworks     GeneratedArtwork[]
+  profile      UserProfile?
+}
+
+model Choice {
+  id             Int       @id @default(autoincrement())
+  sessionId      String
+  shownLeftId    Int
+  shownRightId   Int
+  choice         String
+  choiceNumber   Int
+  responseTimeMs Int
+  createdAt      DateTime  @default(now())
+  
+  session        Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  leftImage      TestImage @relation("LeftImage", fields: [shownLeftId], references: [id])
+  rightImage     TestImage @relation("RightImage", fields: [shownRightId], references: [id])
+}
+
+model GeneratedArtwork {
+  id         String   @id @default(cuid())
+  sessionId  String
+  imageUrl   String
+  prompt     String
+  orderIndex Int
+  createdAt  DateTime @default(now())
+  
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model UserProfile {
+  sessionId           String   @id
+  preferredStyle      String
+  preferredComplexity Float
+  preferredSubjects   String
+  preferredPalette    String
+  explanationText     String?
+  confidenceScore     Float?
+  createdAt           DateTime @default(now())
+  
+  session             Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
