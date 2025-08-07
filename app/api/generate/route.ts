@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/database/prisma'
 import { generateTasteExplanation } from '@/lib/ai/openrouter'
 import { generatePersonalizedArtworks } from '@/lib/ai/fal'
+import { generateTestPlaceholders } from '@/lib/ai/testPlaceholders'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,8 +23,8 @@ export async function POST(request: NextRequest) {
       data: { explanationText: explanation }
     })
 
-    // Generate diversified collection of 12 artworks
-    const artworks = await generatePersonalizedArtworks(preferences, 12)
+    // Generate diversified collection of 8 artworks using FLUX-schnell
+    const artworks = await generatePersonalizedArtworks(preferences, 8)
 
     // Save generated artworks to database with variation types
     const artworkData = artworks.map((artwork, index) => ({

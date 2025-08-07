@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/database/prisma'
 import { AdvancedTasteDiscovery } from '@/lib/algorithms/advancedTasteDiscovery'
-import { ABTestingManager } from '@/lib/algorithms/abTesting'
+import { ABTestingFramework } from '@/lib/algorithms/abTesting'
 import { IncrementalPreferenceTracker } from '@/lib/algorithms/incrementalPreferences'
 
 export async function POST(request: NextRequest) {
@@ -66,7 +66,6 @@ export async function POST(request: NextRequest) {
       const discovery = new AdvancedTasteDiscovery({
         orientation: session.statedOrientation,
         palette: session.statedPalette,
-        size: session.statedSize,
       }, sessionId)
 
       // Process all choices for final preferences
@@ -145,7 +144,7 @@ export async function POST(request: NextRequest) {
       })
 
       // Track with AB testing framework
-      ABTestingManager.trackMetrics({
+      ABTestingFramework.trackMetrics({
         version: 'advanced',
         sessionId,
         completionTime: Date.now() - session.createdAt.getTime(),
@@ -164,7 +163,6 @@ export async function POST(request: NextRequest) {
     const discovery = new AdvancedTasteDiscovery({
       orientation: session.statedOrientation,
       palette: session.statedPalette,
-      size: session.statedSize,
     }, sessionId)
     const nextPair = await discovery.getNextPair(choiceNumber)
 

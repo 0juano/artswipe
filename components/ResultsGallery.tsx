@@ -171,7 +171,7 @@ export default function ResultsGallery({ explanation, artworks, onStartOver }: R
           <button
             className="px-8 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors"
           >
-            Download All 12 High-Res ($9.99)
+            Download All 8 High-Res ($4.99)
           </button>
         </div>
       </div>

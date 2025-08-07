@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 interface IntakeFormProps {
-  onComplete: (data: { orientation: string; palette: string; size: string }) => void
+  onComplete: (data: { orientation: string; palette: string }) => void
 }
 
 const ORIENTATIONS = [
@@ -21,37 +21,28 @@ const PALETTES = [
   { value: 'jewel-tones', label: 'Jewel Tones', colors: ['#9B59B6', '#E74C3C', '#3498DB'] },
 ]
 
-const SIZES = [
-  { value: 'small', label: 'Small', dimensions: '20x25 cm' },
-  { value: 'medium', label: 'Medium', dimensions: '40x50 cm' },
-  { value: 'large', label: 'Large', dimensions: '60x90 cm' },
-  { value: 'extra-large', label: 'Extra Large', dimensions: '75x100 cm' },
-]
 
 export default function IntakeForm({ onComplete }: IntakeFormProps) {
   const [step, setStep] = useState(1)
   const [orientation, setOrientation] = useState('')
   const [palette, setPalette] = useState('')
-  const [size, setSize] = useState('')
 
   const handleNext = () => {
     if (step === 1 && orientation) setStep(2)
-    else if (step === 2 && palette) setStep(3)
-    else if (step === 3 && size) {
-      onComplete({ orientation, palette, size })
+    else if (step === 2 && palette) {
+      onComplete({ orientation, palette })
     }
   }
 
   const isNextDisabled = 
     (step === 1 && !orientation) ||
-    (step === 2 && !palette) ||
-    (step === 3 && !size)
+    (step === 2 && !palette)
 
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-white rounded-2xl shadow-xl">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div
               key={s}
               className={`flex-1 h-2 mx-1 rounded-full transition-colors ${
@@ -63,7 +54,6 @@ export default function IntakeForm({ onComplete }: IntakeFormProps) {
         <h2 className="text-2xl font-bold text-gray-900">
           {step === 1 && "What orientation do you prefer?"}
           {step === 2 && "What colors do you prefer?"}
-          {step === 3 && "What size works best?"}
         </h2>
       </div>
 
@@ -115,24 +105,6 @@ export default function IntakeForm({ onComplete }: IntakeFormProps) {
           </div>
         )}
 
-        {step === 3 && (
-          <div className="grid grid-cols-2 gap-4">
-            {SIZES.map((s) => (
-              <button
-                key={s.value}
-                onClick={() => setSize(s.value)}
-                className={`p-6 rounded-xl border-2 transition-all ${
-                  size === s.value
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'
-                }`}
-              >
-                <div className="font-medium text-gray-900">{s.label}</div>
-                <div className="text-sm text-gray-500">{s.dimensions}</div>
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="mt-8 flex justify-between">
@@ -153,7 +125,7 @@ export default function IntakeForm({ onComplete }: IntakeFormProps) {
               : 'bg-blue-500 text-white hover:bg-blue-600'
           }`}
         >
-          {step === 3 ? 'Start Discovery' : 'Next'}
+          {step === 2 ? 'Start Discovery' : 'Next'}
         </button>
       </div>
     </div>

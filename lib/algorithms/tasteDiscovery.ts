@@ -4,7 +4,6 @@ import { prisma } from '@/lib/database/prisma'
 export class TasteDiscovery {
   private statedOrientation: string
   private statedPalette: string
-  private statedSize: string
   private styleVotes: Map<string, number>
   private subjectVotes: Map<string, number>
   private complexitySum: number
@@ -14,11 +13,9 @@ export class TasteDiscovery {
   constructor(statedPreferences: {
     orientation: string
     palette: string
-    size: string
   }) {
     this.statedOrientation = statedPreferences.orientation
     this.statedPalette = statedPreferences.palette
-    this.statedSize = statedPreferences.size
     
     this.styleVotes = new Map()
     this.subjectVotes = new Map()

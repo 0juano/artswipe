@@ -23,7 +23,7 @@ export async function generatePersonalizedArtworks(
     subjectScores?: Record<string, number>
     secondaryStyles?: string[]
   },
-  count: number = 12
+  count: number = 8
 ): Promise<GeneratedArtwork[]> {
   // Use diversified generation if we have distribution data
   const generator = new DiversifiedArtGenerator(preferences)
@@ -72,7 +72,7 @@ async function generateArtworkPair(
   try {
     // Generate both versions in parallel
     const [framedResponse, cleanResponse] = await Promise.all([
-      fetch('https://fal.run/fal-ai/flux/dev', {
+      fetch('https://fal.run/fal-ai/flux/schnell', {
         method: 'POST',
         headers: {
           'Authorization': `Key ${getFalApiKey()}`,
@@ -81,13 +81,12 @@ async function generateArtworkPair(
         body: JSON.stringify({
           prompt: framedPrompt,
           image_size: getImageSize(orientation),
-          num_inference_steps: 28,
-          guidance_scale: 3.5,
+          num_inference_steps: 4,
           num_images: 1,
           enable_safety_checker: true,
         }),
       }),
-      fetch('https://fal.run/fal-ai/flux/dev', {
+      fetch('https://fal.run/fal-ai/flux/schnell', {
         method: 'POST',
         headers: {
           'Authorization': `Key ${getFalApiKey()}`,
@@ -96,8 +95,7 @@ async function generateArtworkPair(
         body: JSON.stringify({
           prompt: cleanPrompt,
           image_size: getImageSize(orientation),
-          num_inference_steps: 28,
-          guidance_scale: 3.5,
+          num_inference_steps: 4,
           num_images: 1,
           enable_safety_checker: true,
         }),

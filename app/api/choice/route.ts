@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
     const discovery = new TasteDiscovery({
       orientation: session.statedOrientation,
       palette: session.statedPalette,
-      size: session.statedSize,
     })
 
     // Process all choices

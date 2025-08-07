@@ -17,7 +17,6 @@ interface StyleCorrelation {
 export class AdvancedTasteDiscovery {
   private statedOrientation: string
   private statedPalette: string
-  private statedSize: string
   
   // Advanced tracking
   private styleScores: Map<string, number>
@@ -38,11 +37,9 @@ export class AdvancedTasteDiscovery {
   constructor(statedPreferences: {
     orientation: string
     palette: string
-    size: string
   }, sessionId?: string) {
     this.statedOrientation = statedPreferences.orientation
     this.statedPalette = statedPreferences.palette
-    this.statedSize = statedPreferences.size
     
     this.styleScores = new Map()
     this.subjectScores = new Map()

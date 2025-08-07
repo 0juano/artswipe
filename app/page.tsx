@@ -21,7 +21,7 @@ export default function ArtSwipeFlow() {
   const [choiceStartTime, setChoiceStartTime] = useState<number>(Date.now())
   const [isLoadingNext, setIsLoadingNext] = useState(false)
 
-  const handleIntakeComplete = async (data: { orientation: string; palette: string; size: string }) => {
+  const handleIntakeComplete = async (data: { orientation: string; palette: string }) => {
     try {
       const response = await fetch('/api/session/start', {
         method: 'POST',
