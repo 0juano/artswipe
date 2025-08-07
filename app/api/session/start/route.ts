@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       data: {
         statedOrientation: orientation,
         statedPalette: palette,
+        statedSize: 'medium', // Default size since it was removed from intake
       }
     })
 
@@ -30,9 +31,17 @@ export async function POST(request: NextRequest) {
     let discovery: TasteDiscovery | AdvancedTasteDiscovery
     
     if (algorithmVersion === 'advanced' || algorithmVersion === 'experimental') {
-      discovery = new AdvancedTasteDiscovery({ orientation, palette }, session.id)
+      discovery = new AdvancedTasteDiscovery({ 
+        orientation, 
+        palette, 
+        size: 'medium' 
+      }, session.id)
     } else {
-      discovery = new TasteDiscovery({ orientation, palette })
+      discovery = new TasteDiscovery({ 
+        orientation, 
+        palette, 
+        size: 'medium' 
+      })
     }
     
     const firstPair = await discovery.getNextPair(0)
