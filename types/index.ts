@@ -42,6 +42,8 @@ export interface GeneratedArtwork {
   cleanImageUrl?: string
   prompt: string
   orderIndex?: number
+  variationType?: string
+  description?: string
 }
 
 export interface UserPreferences {

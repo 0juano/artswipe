@@ -6,6 +6,7 @@ import ImageComparison from '@/components/ImageComparison'
 import ResultsGallery from '@/components/ResultsGallery'
 import ProgressBar from '@/components/ProgressBar'
 import LoadingScreen from '@/components/LoadingScreen'
+import SkeletonLoader from '@/components/SkeletonLoader'
 import { SessionData, TestImagePair, GeneratedArtwork, UserPreferences } from '@/types'
 
 export default function ArtSwipeFlow() {
@@ -18,6 +19,7 @@ export default function ArtSwipeFlow() {
   const [preferences, setPreferences] = useState<UserPreferences | null>(null)
   const [algorithmVersion, setAlgorithmVersion] = useState<string>('basic')
   const [choiceStartTime, setChoiceStartTime] = useState<number>(Date.now())
+  const [isLoadingNext, setIsLoadingNext] = useState(false)
 
   const handleIntakeComplete = async (data: { orientation: string; palette: string; size: string }) => {
     try {
@@ -44,9 +46,11 @@ export default function ArtSwipeFlow() {
   }
 
   const handleChoice = async (choice: 'left' | 'right') => {
-    if (!sessionData || !currentPair) return
+    if (!sessionData || !currentPair || isLoadingNext) return
 
     try {
+      setIsLoadingNext(true)
+      
       // Calculate response time for this choice
       const responseTime = Date.now() - choiceStartTime
       
@@ -79,8 +83,12 @@ export default function ArtSwipeFlow() {
         setInteractionCount(interactionCount + 1)
         setChoiceStartTime(Date.now())  // Reset timer for next choice
       }
+      
+      setIsLoadingNext(false)
     } catch (error) {
       console.error('Error submitting choice:', error)
+      setIsLoadingNext(false)
+      alert('Failed to submit choice. Please try again.')
     }
   }
 
@@ -136,11 +144,18 @@ export default function ArtSwipeFlow() {
             </div>
           )}
           <ProgressBar current={interactionCount} total={20} />
-          <ImageComparison
-            leftImage={currentPair.left}
-            rightImage={currentPair.right}
-            onChoice={handleChoice}
-          />
+          {isLoadingNext ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <SkeletonLoader type="image" />
+              <SkeletonLoader type="image" />
+            </div>
+          ) : (
+            <ImageComparison
+              leftImage={currentPair.left}
+              rightImage={currentPair.right}
+              onChoice={handleChoice}
+            />
+          )}
         </div>
       </div>
     )

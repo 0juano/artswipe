@@ -1,0 +1,39 @@
+
+> artswipe@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.99:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 1354ms
+ ○ Compiling / ...
+ ✓ Compiled / in 146.4s (586 modules)
+ GET / 200 in 42862ms
+ GET / 200 in 42871ms
+ ✓ Compiled in 123ms (251 modules)
+ GET / 200 in 39ms
+ GET / 200 in 40ms
+ ○ Compiling /api/session/start ...
+ POST /api/session/start 500 in 15828ms
+ POST /api/session/start 500 in 12106ms
+ POST /api/session/start 500 in 17578ms
+ ✓ Compiled /api/session/start in 154ms (578 modules)
+ ✓ Compiled in 55ms (252 modules)
+ GET / 200 in 16801ms
+ GET / 200 in 16795ms
+ GET / 200 in 36ms
+ GET / 200 in 18ms
+ GET / 200 in 171ms
+ ○ Compiling /api/session/start ...
+ ✓ Compiled /api/session/start in 8.5s (350 modules)
+ GET / 200 in 1346ms
+ POST /api/session/start 200 in 9829ms
+ POST /api/session/start 200 in 26ms
+ ○ Compiling /_error ...
+ GET / 200 in 69559ms
+ POST /api/session/start 200 in 13924ms
+ GET / 200 in 1277ms
+[?25h

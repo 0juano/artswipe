@@ -1,7 +1,9 @@
 'use client'
 
-import Image from 'next/image'
+import { useEffect } from 'react'
+import OptimizedImage from './OptimizedImage'
 import { TestImage } from '@/types'
+import { preloadImages } from '@/lib/utils/imageOptimization'
 
 interface ImageComparisonProps {
   leftImage: TestImage
@@ -10,6 +12,16 @@ interface ImageComparisonProps {
 }
 
 export default function ImageComparison({ leftImage, rightImage, onChoice }: ImageComparisonProps) {
+  // Preload potential next images
+  useEffect(() => {
+    // Could receive next pair URLs to preload
+    const handleImageLoaded = () => {
+      // Image loaded successfully, could trigger preload of next pair
+    }
+    
+    window.addEventListener('imageLoaded', handleImageLoaded)
+    return () => window.removeEventListener('imageLoaded', handleImageLoaded)
+  }, [])
   return (
     <div className="w-full">
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">
@@ -23,13 +35,12 @@ export default function ImageComparison({ leftImage, rightImage, onChoice }: Ima
         >
           <div className="aspect-square relative">
             {leftImage.imageUrl ? (
-              <Image
+              <OptimizedImage
                 src={leftImage.imageUrl}
                 alt="Left artwork option"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
+                type="comparison"
+                className="w-full h-full"
+                priority={false}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -54,13 +65,12 @@ export default function ImageComparison({ leftImage, rightImage, onChoice }: Ima
         >
           <div className="aspect-square relative">
             {rightImage.imageUrl ? (
-              <Image
+              <OptimizedImage
                 src={rightImage.imageUrl}
                 alt="Right artwork option"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
+                type="comparison"
+                className="w-full h-full"
+                priority={false}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">

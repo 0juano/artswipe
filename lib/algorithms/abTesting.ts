@@ -136,8 +136,8 @@ class ExperimentalTasteDiscovery extends AdvancedTasteDiscovery {
   private emotionalTones: Map<string, number>
   private culturalPreferences: Map<string, number>
   
-  constructor(statedPreferences: { orientation: string; palette: string; size: string }) {
-    super(statedPreferences)
+  constructor(statedPreferences: { orientation: string; palette: string; size: string }, sessionId?: string) {
+    super(statedPreferences, sessionId)
     this.emotionalTones = new Map()
     this.culturalPreferences = new Map()
   }
