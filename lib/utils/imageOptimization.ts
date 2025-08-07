@@ -12,7 +12,13 @@ export function generateBlurPlaceholder(width: number = 4, height: number = 4): 
     <rect width="${width}" height="${height}" fill="#e5e7eb"/>
   </svg>`
   
-  return `data:image/svg+xml;base64,${Buffer.from(canvas).toString('base64')}`
+  // Use btoa for browser compatibility (or native base64 encoding)
+  if (typeof window !== 'undefined' && window.btoa) {
+    return `data:image/svg+xml;base64,${window.btoa(canvas)}`
+  }
+  
+  // Fallback to URL encoding for SVG
+  return `data:image/svg+xml,${encodeURIComponent(canvas)}`
 }
 
 /**
