@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/database/prisma'
 import { AdvancedTasteDiscovery } from '@/lib/algorithms/advancedTasteDiscovery'
-import { ABTestingFramework } from '@/lib/algorithms/abTesting'
+import { ABTestingManager } from '@/lib/algorithms/abTesting'
 import { IncrementalPreferenceTracker } from '@/lib/algorithms/incrementalPreferences'
 
 export async function POST(request: NextRequest) {
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       })
 
       // Track with AB testing framework
-      ABTestingFramework.trackMetrics({
+      ABTestingManager.trackMetrics({
         version: 'advanced',
         sessionId,
         completionTime: Date.now() - session.createdAt.getTime(),

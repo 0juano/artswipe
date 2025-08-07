@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/database/prisma'
 import { TasteDiscovery } from '@/lib/algorithms/tasteDiscovery'
 import { AdvancedTasteDiscovery } from '@/lib/algorithms/advancedTasteDiscovery'
-import { ABTestingFramework } from '@/lib/algorithms/abTesting'
+import { ABTestingManager } from '@/lib/algorithms/abTesting'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Assign algorithm version for this session
-    const algorithmVersion = ABTestingFramework.assignAlgorithm(session.id)
+    const algorithmVersion = ABTestingManager.assignAlgorithm(session.id)
     
     // Update session with algorithm version
     await prisma.session.update({
